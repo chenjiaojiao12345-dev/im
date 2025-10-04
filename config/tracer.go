@@ -5,9 +5,8 @@ import (
 	"io"
 	"net/http"
 
-	llog "github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
+	llog "github.com/chenjiaojiao12345-dev/im/pkg/log"
 	"github.com/gin-gonic/gin"
-	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/uber/jaeger-client-go"
