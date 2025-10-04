@@ -1,4 +1,4 @@
-module github.com/chenjiaojiao12345-dev/im
+module github.com/TangSengDaoDao/TangSengDaoDaoServerLib
 
 go 1.20
 
