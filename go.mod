@@ -1,4 +1,4 @@
-module gitlab.go019.com/p17/im
+module github.com/TangSengDaoDao/TangSengDaoDaoServerLib
 
 go 1.20
 
