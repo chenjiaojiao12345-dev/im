@@ -1,4 +1,4 @@
-module gitlab.go019.com/p17/im/im_server_lib
+module gitlab.go019.com/p17/im
 
 go 1.20
 
