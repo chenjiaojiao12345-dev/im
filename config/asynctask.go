@@ -3,13 +3,14 @@ package config
 import (
 	"context"
 
+	"github.com/RichardKnop/machinery/v2"
 	redisbackend "github.com/RichardKnop/machinery/v2/backends/redis"
 	"github.com/RichardKnop/machinery/v2/backends/result"
 	redisbroker "github.com/RichardKnop/machinery/v2/brokers/redis"
 	"github.com/RichardKnop/machinery/v2/config"
 	eagerlock "github.com/RichardKnop/machinery/v2/locks/eager"
 	"github.com/RichardKnop/machinery/v2/tasks"
-	"github.com/chenjiaojiao12345-dev/im/pkg/log"
+	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/log"
 	"go.uber.org/zap"
 )
 

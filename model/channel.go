@@ -1,6 +1,6 @@
 package model
 
-import "github.com/chenjiaojiao12345-dev/im/config"
+import "github.com/TangSengDaoDao/TangSengDaoDaoServerLib/config"
 
 type ChannelResp struct {
 	Channel struct {
