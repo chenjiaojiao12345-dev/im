@@ -395,7 +395,18 @@ func New() *Config {
 			Partition:      100,
 			DefaultBaseURL: "",
 		},
-
+		
+		// ---------- 邮箱 ----------
+		AWSSESConfig: struct{
+			TestCode string
+			Region   string
+			AccessID string
+			Secret   string
+			From     string
+		}{
+			TestCode: "123456",
+		},
+		
 		// ---------- 短号配置 ----------
 		ShortNo: struct {
 			NumOn   bool
