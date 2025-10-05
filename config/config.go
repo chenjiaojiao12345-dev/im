@@ -656,7 +656,7 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 	c.AWSSESConfig.Region = c.getString("awsSESConfig.region", c.AWSSESConfig.Region)
 	c.AWSSESConfig.AccessID = c.getString("awsSESConfig.accessKeyID", c.AWSSESConfig.AccessID)
 	c.AWSSESConfig.Secret = c.getString("awsSESConfig.secret", c.AWSSESConfig.Secret)
-	c.AWSSESConfig.Secret = c.getString("awsSESConfig.from", c.AWSSESConfig.From)
+	c.AWSSESConfig.from = c.getString("awsSESConfig.from", c.AWSSESConfig.From)
 
 	//#################### 悟空IM ####################
 	c.WuKongIM.APIURL = c.getString("wukongIM.apiURL", c.WuKongIM.APIURL)
