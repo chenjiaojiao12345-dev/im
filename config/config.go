@@ -624,6 +624,7 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 	c.S3.SecretAccessKey = c.getString("s3.secretAccessKey", c.S3.SecretAccessKey)
 	c.S3.Endpoint = c.getString("s3.endpoint", c.S3.Endpoint)
 	c.S3.Bucket = c.getString("s3.bucket", c.S3.Bucket)
+	c.S3.PublicDomain = c.getString("s3.publicDomain", c.S3.PublicDomain)
 	// minio
 	c.Minio.URL = c.getString("minio.url", c.Minio.URL)
 	if c.FileService == FileServiceMinio {
@@ -1066,6 +1067,7 @@ type S3Config struct {
 	SecretAccessKey string
 	Endpoint        string
 	Bucket          string
+	PublicDomain    string
 }
 
 // UnismsConfig unisms短信
