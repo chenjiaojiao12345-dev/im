@@ -38,6 +38,8 @@ const (
 	FileServiceMinio FileService = "minio"
 	// FileServiceQiniu 七牛云上传服务
 	FileServiceQiniu FileService = "qiniu"
+	// FileServiceS3  S3上传服务
+	FileServiceS3 FileService = "s3"
 )
 
 func (u FileService) String() string {
@@ -372,7 +374,7 @@ func New() *Config {
 			AdminUID:        "admin",
 		},
 		// ---------- 文件服务 ----------
-		FileService: FileServiceMinio,
+		FileService: FileServiceS3,
 
 		// ---------- 短信服务 ----------
 		SMSProvider: SMSProviderAliyun,
