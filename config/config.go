@@ -136,6 +136,7 @@ type Config struct {
 	Minio       MinioConfig   // minio配置
 	Seaweed     SeaweedConfig // seaweedfs配置
 	Qiniu       QiniuConfig   // 七牛云配置
+	S3          S3Config      // S3配置
 
 	// ---------- 短信运营商 ----------
 	SMSCode                string // 模拟的短信验证码
@@ -615,6 +616,12 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 	c.OSS.AccessKeyID = c.getString("oss.accessKeyID", c.OSS.AccessKeyID)
 	c.OSS.AccessKeySecret = c.getString("oss.accessKeySecret", c.OSS.AccessKeySecret)
 	c.OSS.BucketName = c.getString("oss.bucketName", c.OSS.BucketName)
+	// s3
+	c.S3.Region = c.getString("s3.region", c.S3.Region)
+	c.S3.AccessKeyID = c.getString("s3.accessKeyID", c.S3.AccessKeyID)
+	c.S3.SecretAccessKey = c.getString("s3.secretAccessKey", c.S3.SecretAccessKey)
+	c.S3.Endpoint = c.getString("s3.endpoint", c.S3.Endpoint)
+	c.S3.Bucket = c.getString("s3.bucket", c.S3.Bucket)
 	// minio
 	c.Minio.URL = c.getString("minio.url", c.Minio.URL)
 	if c.FileService == FileServiceMinio {
@@ -1049,6 +1056,14 @@ type QiniuConfig struct {
 	BucketName string
 	AccessKey  string
 	SecretKey  string
+}
+
+type S3Config struct {
+	Region          string
+	AccessKeyID     string
+	SecretAccessKey string
+	Endpoint        string
+	Bucket          string
 }
 
 // UnismsConfig unisms短信
