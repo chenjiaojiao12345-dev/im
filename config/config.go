@@ -254,6 +254,11 @@ type Config struct {
 		AppSecret string
 	}
 
+	// ---------- kaijiang ----------
+	KaiJiang struct {
+		Token string //开奖源TOKEN
+	}
+
 	// ---------- tracing ----------
 	Tracing struct {
 		On   bool   // 是否开启tracing
@@ -791,6 +796,9 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 	c.Support.Email = c.getString("support.email", c.Support.Email)
 	c.Support.EmailSmtp = c.getString("support.emailSmtp", c.Support.EmailSmtp)
 	c.Support.EmailPwd = c.getString("support.emailPwd", c.Support.EmailPwd)
+
+	//#################### kaijiang ####################
+	c.KaiJiang.Token = c.getString("kaiJiang.token", c.KaiJiang.Token)
 
 }
 
