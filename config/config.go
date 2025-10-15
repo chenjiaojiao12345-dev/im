@@ -246,11 +246,6 @@ type Config struct {
 		SendMessageOn                 bool // 是否开启接口发送发送消息
 		SyncReadedCountIntervalSecond int  // 同步消息已读数量间隔时间（单位秒）
 	}
-	// ----------- 假人 ------------
-	Manequin struct {
-		ManequinOn             bool // 假人消息开关
-		ManequinIntervalSecond int  // 假人消息监测间隔时间(单位秒)
-	}
 	// ---------- wechat ----------
 	Wechat struct {
 		AppID     string // 微信appid 在开放平台内
@@ -785,10 +780,6 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 	//#################### message ####################
 	c.Message.SendMessageOn = c.getBool("message.sendMessageOn", c.Message.SendMessageOn)
 	c.Message.SyncReadedCountIntervalSecond = c.getInt("message.syncReadedCountIntervalSecond", c.Message.SyncReadedCountIntervalSecond)
-	//#################### 假人 ####################
-	c.Manequin.ManequinOn = c.getBool("manequin.manequinOn", c.Manequin.ManequinOn)
-	c.Manequin.ManequinIntervalSecond = c.getInt("manequin.manequinIntervalSecond", c.Manequin.ManequinIntervalSecond)
-
 	//#################### weixin ####################
 	c.Wechat.AppID = c.getString("wechat.appID", c.Wechat.AppID)
 	c.Wechat.AppSecret = c.getString("wechat.appSecret", c.Wechat.AppSecret)
