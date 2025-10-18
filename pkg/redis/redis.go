@@ -26,6 +26,10 @@ func New(addr string, password string) *Conn {
 	return c
 }
 
+func (rc *Conn) Client() *rd.Client {
+	return rc.client
+}
+
 func (rc *Conn) Ping() (string, error) {
 	return rc.client.Ping().Result()
 }
