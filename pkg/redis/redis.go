@@ -35,6 +35,10 @@ func (rc *Conn) Set(key string, value interface{}) error {
 	return rc.client.Set(key, value, 0).Err()
 }
 
+func (rc *Conn) SetNX(key string, value interface{}, expiration time.Duration) (bool, error) {
+	return rc.client.SetNX(key, value, expiration).Result()
+}
+
 // expire 过期时间
 func (rc *Conn) SetAndExpire(key string, value interface{}, expire time.Duration) error {
 
