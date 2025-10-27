@@ -115,6 +115,8 @@ const (
 	GroupAllowViewHistoryMsg = "allow_view_history_msg"
 	// GroupAllowMemberPinnedMessage 是否允许成员置顶消息
 	GroupAllowMemberPinnedMessage = "allow_member_pinned_message"
+	// GroupRevokeSwitch 撤回开关
+	GroupRevokeSwitch = "revoke_switch"
 )
 
 // 命令消息
