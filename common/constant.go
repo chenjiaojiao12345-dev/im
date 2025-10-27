@@ -117,6 +117,8 @@ const (
 	GroupAllowMemberPinnedMessage = "allow_member_pinned_message"
 	// GroupRevokeSwitch 撤回开关
 	GroupRevokeSwitch = "revoke_switch"
+	// GroupType 群类型
+	GroupType = "group_type"
 )
 
 // 命令消息
