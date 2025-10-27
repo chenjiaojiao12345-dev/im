@@ -2,10 +2,9 @@ package config
 
 import (
 	"fmt"
+	"github.com/chenjiaojiao12345-dev/im/common"
+	"github.com/chenjiaojiao12345-dev/im/pkg/util"
 	"strings"
-
-	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/common"
-	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/util"
 )
 
 // SendGroupCreate 发送群创建的消息
@@ -127,7 +126,24 @@ func (c *Context) SendGroupUpdate(req *MsgGroupUpdateReq) error {
 			content += fmt.Sprintf(`封禁了该群`)
 		}
 		break
+	case common.GroupRevokeSwitch:
+		status, _ := req.Data[common.GroupRevokeSwitch]
+		if status == "1" {
+			content += fmt.Sprintf(`打开撤回功能`)
+		} else {
+			content += fmt.Sprintf(`关闭撤回功能`)
+		}
+		break
+	case common.GroupType:
+		status, _ := req.Data[common.GroupType]
+		if status == "1" {
+			content += fmt.Sprintf(`升级为高级群`)
+		} else {
+			content += fmt.Sprintf(`降级为普通群`)
+		}
+		break
 	}
+
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
 			NoPersist: 0,
