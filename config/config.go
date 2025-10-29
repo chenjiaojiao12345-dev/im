@@ -515,7 +515,7 @@ func New() *Config {
 			EmailPwd:  "",
 		},
 
-		QRCodeInfoURL: "api/v1/qrcode/:code",
+		QRCodeInfoURL: "v1/qrcode/:code",
 
 		Test: GetEnvBool("Test", false),
 
