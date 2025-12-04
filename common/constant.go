@@ -119,6 +119,8 @@ const (
 	GroupRevokeSwitch = "revoke_switch"
 	// GroupType 群类型
 	GroupType = "group_type"
+	// GroupShowOnline 群成员显示在线状态
+	GroupShowOnline = "show_online"
 )
 
 // 命令消息
