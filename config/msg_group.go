@@ -142,6 +142,14 @@ func (c *Context) SendGroupUpdate(req *MsgGroupUpdateReq) error {
 			content += fmt.Sprintf(`降级为普通群`)
 		}
 		break
+	case common.GroupShowOnline:
+		status, _ := req.Data[common.GroupShowOnline]
+		if status == "1" {
+			content += fmt.Sprintf(`打开群成员在线状态显示`)
+		} else {
+			content += fmt.Sprintf(`关闭群成员在线状态显示`)
+		}
+		break
 	}
 
 	return c.SendMessage(&MsgSendReq{

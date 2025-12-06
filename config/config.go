@@ -1087,47 +1087,49 @@ type AliyunInternationalSMSConfig struct {
 
 // 苹果推送
 type APNSPush struct {
-	Dev      bool
-	Topic    string
-	Password string
-	Cert     string
+	Dev      bool   `json:"dev"`
+	Topic    string `json:"topic"`
+	Password string `json:"password"`
+	Cert     string `json:"cert"`
 }
 
 // 华为推送
 type HMSPush struct {
-	PackageName string
-	AppID       string
-	AppSecret   string
+	PackageName string `json:"packageName"`
+	AppID       string `json:"appId"`
+	AppSecret   string `json:"appSecret"`
 }
 
 // 小米推送
 type MIPush struct {
-	PackageName string
-	AppID       string
-	AppSecret   string
-	ChannelID   string
+	PackageName string `json:"packageName"`
+	AppID       string `json:"appId"`
+	AppSecret   string `json:"appSecret"`
+	ChannelID   string `json:"channelId"`
 }
 
-// oppo推送
+// OPPO 推送
 type OPPOPush struct {
-	PackageName  string
-	AppID        string
-	AppKey       string
-	AppSecret    string
-	MasterSecret string
+	PackageName  string `json:"packageName"`
+	AppID        string `json:"appId"`
+	AppKey       string `json:"appKey"`
+	AppSecret    string `json:"appSecret"`
+	MasterSecret string `json:"masterSecret"`
 }
 
+// VIVO 推送
 type VIVOPush struct {
-	PackageName string
-	AppID       string
-	AppKey      string
-	AppSecret   string
+	PackageName string `json:"packageName"`
+	AppID       string `json:"appId"`
+	AppKey      string `json:"appKey"`
+	AppSecret   string `json:"appSecret"`
 }
 
+// Firebase 推送
 type FIREBASEPush struct {
-	PackageName string
-	JsonPath    string // firebase推送需要的json的路径
-	ProjectId   string // serviceAccountJson中的project_id值
+	PackageName string `json:"packageName"`
+	JsonPath    string `json:"jsonPath"`
+	ProjectId   string `json:"projectId"`
 }
 
 type duration struct {
