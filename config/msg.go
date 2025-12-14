@@ -400,6 +400,23 @@ func (c *Context) IMAddSystemAcount(uids []string) error {
 	return c.handlerIMError(resp)
 }
 
+// IMRemoveSystemAcount 移除系统账号
+func (c *Context) IMRemoveSystemAcount(uids []string) error {
+	body := map[string][]string{
+		"uids": uids,
+	}
+
+	resp, err := network.Post(
+		c.cfg.WuKongIM.APIURL+"/user/systemuids_remove",
+		[]byte(util.ToJson(body)),
+		nil,
+	)
+	if err != nil {
+		return err
+	}
+	return c.handlerIMError(resp)
+}
+
 // IMSyncUserConversationAck 同步用户会话数据回执
 // func (c *Context) IMSyncUserConversationAck(uid string, cmdVersion int64) error {
 
