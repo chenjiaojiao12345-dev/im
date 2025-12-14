@@ -383,6 +383,15 @@ func (c *Context) IMSyncUserConversation(uid string, version int64, msgCount int
 	return conversations, nil
 }
 
+// IMAddSystemAcount 添加系统账号
+func (c *Context) IMAddSystemAcount(uids []string) error {
+	resp, err := network.Post(c.cfg.WuKongIM.APIURL+"/user/systemuids_add", []byte(util.ToJson(uids)), nil)
+	if err != nil {
+		return nil
+	}
+	return c.handlerIMError(resp)
+}
+
 // IMSyncUserConversationAck 同步用户会话数据回执
 // func (c *Context) IMSyncUserConversationAck(uid string, cmdVersion int64) error {
 
