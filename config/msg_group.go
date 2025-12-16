@@ -152,6 +152,11 @@ func (c *Context) SendGroupUpdate(req *MsgGroupUpdateReq) error {
 		break
 	}
 
+	//此选项不需要发送消息
+	if req.Attr == common.GroupShowOnline {
+		return nil
+	}
+
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
 			NoPersist: 0,
