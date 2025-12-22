@@ -51,6 +51,32 @@ func Setup(ctx *config.Context) error {
 
 }
 
+func SetupNoSql(ctx *config.Context) error {
+
+	// 获取所有模块
+	ms := register.GetModules(ctx)
+
+	// 注册api
+	for _, m := range ms {
+		if m.SetupAPI != nil {
+			a := m.SetupAPI()
+			if a != nil {
+				a.Route(ctx.GetHttpRoute())
+			}
+		}
+		if ctx.SetupTask {
+			if m.SetupTask != nil {
+				t := m.SetupTask()
+				if t != nil {
+					t.RegisterTasks()
+				}
+			}
+		}
+	}
+	return nil
+
+}
+
 func Start(ctx *config.Context) error {
 	// 获取所有模块
 	ms := register.GetModules(ctx)
