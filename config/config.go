@@ -406,9 +406,7 @@ func New() *Config {
 			AccessID string
 			Secret   string
 			From     string
-		}{
-			TestCode: "123456",
-		},
+		}{},
 
 		// ---------- 短号配置 ----------
 		ShortNo: struct {
