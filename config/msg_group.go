@@ -373,6 +373,31 @@ func (c *Context) SendGroupMemberInviteReq(req MsgGroupMemberInviteReq) error {
 		}))})
 }
 
+// SendGroupMemberInviteReq 邀请入群消息
+func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
+	content := fmt.Sprintf(`“{0}“%s申请加入群聊`, req.JoinName)
+	return c.SendMessage(&MsgSendReq{
+		Header: MsgHeader{
+			NoPersist: 0,
+			RedDot:    1,
+			SyncOnce:  0, // 只同步一次
+		},
+		ChannelID:   req.GroupNo,
+		ChannelType: common.ChannelTypeGroup.Uint8(),
+		// Subscribers: req.Subscribers,
+		Payload: []byte(util.ToJson(map[string]interface{}{
+			"content": content,
+			"extra": []UserBaseVo{
+				{
+					UID:  req.Uid,
+					Name: req.JoinName,
+				},
+			},
+			"type":     common.GroupMemberApplyJoin,
+			"visibles": req.Subscribers,
+		}))})
+}
+
 // 发送某个用户退出群聊的消息
 func (c *Context) SendGroupExit(groupNo string, uid string, name string, visibleUids []string) error {
 	// 发送群成员退出群聊消息
