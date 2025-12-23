@@ -78,7 +78,7 @@ const (
 	GroupMemberBeRemove ContentType = 1020
 	// GroupMemberBeRemove 群成员主动退出群聊
 	GroupMemberQuit ContentType = 1021
-	// 群升级
+	// GroupUpgrade 群升级
 	GroupUpgrade ContentType = 1022
 	// GroupMemberApplyJoin 群成员申请加入
 	GroupMemberApplyJoin ContentType = 1023
