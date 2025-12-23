@@ -373,7 +373,7 @@ func (c *Context) SendGroupMemberInviteReq(req MsgGroupMemberInviteReq) error {
 		}))})
 }
 
-// SendGroupMemberInviteReq 邀请入群消息
+// SendGroupMemberApplyJoinReq 申请入群消息
 func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
 	content := fmt.Sprintf(`“{0}“%s申请加入群聊`, req.JoinName)
 	return c.SendMessage(&MsgSendReq{
