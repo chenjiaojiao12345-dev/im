@@ -80,6 +80,8 @@ const (
 	GroupMemberQuit ContentType = 1021
 	// 群升级
 	GroupUpgrade ContentType = 1022
+	// GroupMemberApplyJoin 群成员申请加入
+	GroupMemberApplyJoin ContentType = 1023
 
 	// ---------- 客服类 ----------
 	HotlineAssignTo ContentType = 1200 // 分配客服

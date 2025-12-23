@@ -428,6 +428,14 @@ type MsgGroupMemberInviteReq struct {
 	Subscribers []string `json:"subscribers"`  // 消息订阅者
 }
 
+// MsgGroupMemberInviteReq 群成员申请加入请求
+type MsgGroupMemberJoinReq struct {
+	GroupNo     string   `json:"group_no"`     // 群编号
+	Uid         string   `json:"inviter"`      // 申请者
+	JoinName    string   `json:"inviter_name"` // 申请者名称
+	Subscribers []string `json:"subscribers"`  // 消息订阅者
+}
+
 // MsgGroupTransferGrouper 群主转让
 type MsgGroupTransferGrouper struct {
 	GroupNo        string `json:"group_no"`
