@@ -130,6 +130,8 @@ func (c ContentType) String() string {
 		return "GIF"
 	case Voice:
 		return "Voice"
+	case Video:
+		return "Video"
 	case CMD:
 		return "CMD"
 	case FriendApply:
