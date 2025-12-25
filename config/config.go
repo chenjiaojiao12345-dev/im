@@ -1130,6 +1130,50 @@ type FIREBASEPush struct {
 	ProjectId   string `json:"projectId"`
 }
 
+func MaskSecret(s string) string {
+	if s == "" {
+		return ""
+	}
+	if len(s) <= 8 {
+		return "******"
+	}
+	return s[:4] + "******" + s[len(s)-4:]
+}
+
+func (a APNSPush) Safe() APNSPush {
+	a.Password = MaskSecret(a.Password)
+	a.Cert = MaskSecret(a.Cert)
+	return a
+}
+
+func (h HMSPush) Safe() HMSPush {
+	h.AppSecret = MaskSecret(h.AppSecret)
+	return h
+}
+
+func (m MIPush) Safe() MIPush {
+	m.AppSecret = MaskSecret(m.AppSecret)
+	return m
+}
+
+func (o OPPOPush) Safe() OPPOPush {
+	o.AppKey = MaskSecret(o.AppKey)
+	o.AppSecret = MaskSecret(o.AppSecret)
+	o.MasterSecret = MaskSecret(o.MasterSecret)
+	return o
+}
+
+func (v VIVOPush) Safe() VIVOPush {
+	v.AppKey = MaskSecret(v.AppKey)
+	v.AppSecret = MaskSecret(v.AppSecret)
+	return v
+}
+
+func (f FIREBASEPush) Safe() FIREBASEPush {
+	f.JsonPath = MaskSecret(f.JsonPath)
+	return f
+}
+
 type duration struct {
 	time.Duration
 }
