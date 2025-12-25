@@ -5,6 +5,7 @@ import (
 	"github.com/chenjiaojiao12345-dev/im/common"
 	"github.com/chenjiaojiao12345-dev/im/pkg/util"
 	"strings"
+	"time"
 )
 
 // SendGroupCreate 发送群创建的消息
@@ -387,11 +388,17 @@ func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
 		// Subscribers: req.Subscribers,
 		Payload: []byte(util.ToJson(map[string]interface{}{
 			"content": content,
-			"extra": []UserBaseVo{
-				{
-					UID:  req.Uid,
+			"extra": map[string]interface{}{
+				"inviter": UserBaseVo{
+					UID:  req.InviteUid,
+					Name: req.InviteName,
+				},
+				"join": UserBaseVo{
+					UID:  req.JoinUid,
 					Name: req.JoinName,
 				},
+				"source":    req.Source,
+				"applyTime": time.Now().Unix(),
 			},
 			"type":     common.GroupMemberApplyJoin,
 			"visibles": req.Subscribers,
@@ -455,10 +462,13 @@ type MsgGroupMemberInviteReq struct {
 
 // MsgGroupMemberInviteReq 群成员申请加入请求
 type MsgGroupMemberJoinReq struct {
-	GroupNo     string   `json:"group_no"`     // 群编号
-	Uid         string   `json:"inviter"`      // 申请者
-	JoinName    string   `json:"inviter_name"` // 申请者名称
-	Subscribers []string `json:"subscribers"`  // 消息订阅者
+	GroupNo     string   `json:"group_no"`    // 群编号
+	JoinUid     string   `json:"join_uid"`    // 申请者
+	JoinName    string   `json:"join_name"`   // 申请者名称
+	InviteUid   string   `json:"invite_uid"`  // 邀请者
+	InviteName  string   `json:"invite_name"` // 邀请者名称
+	Source      int      `json:"source"`      // 申请来源 1主动加入 2邀请加入
+	Subscribers []string `json:"subscribers"` // 消息订阅者
 }
 
 // MsgGroupTransferGrouper 群主转让
