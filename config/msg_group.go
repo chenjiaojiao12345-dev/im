@@ -376,7 +376,7 @@ func (c *Context) SendGroupMemberInviteReq(req MsgGroupMemberInviteReq) error {
 
 // SendGroupMemberApplyJoinReq 申请入群消息
 func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
-	content := fmt.Sprintf(`“{0}“%s申请加入群聊`, req.JoinName)
+	content := fmt.Sprintf(`“{0}“想邀请%d位朋友加入群聊`, len(req.JoinUser))
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
 			NoPersist: 0,
@@ -393,10 +393,7 @@ func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
 					UID:  req.InviteUid,
 					Name: req.InviteName,
 				},
-				"join": UserBaseVo{
-					UID:  req.JoinUid,
-					Name: req.JoinName,
-				},
+				"join":      req.JoinUser,
 				"source":    req.Source,
 				"applyTime": time.Now().Unix(),
 			},
@@ -462,13 +459,12 @@ type MsgGroupMemberInviteReq struct {
 
 // MsgGroupMemberInviteReq 群成员申请加入请求
 type MsgGroupMemberJoinReq struct {
-	GroupNo     string   `json:"group_no"`    // 群编号
-	JoinUid     string   `json:"join_uid"`    // 申请者
-	JoinName    string   `json:"join_name"`   // 申请者名称
-	InviteUid   string   `json:"invite_uid"`  // 邀请者
-	InviteName  string   `json:"invite_name"` // 邀请者名称
-	Source      int      `json:"source"`      // 申请来源 1主动加入 2邀请加入
-	Subscribers []string `json:"subscribers"` // 消息订阅者
+	GroupNo     string            `json:"group_no"`    // 群编号
+	JoinUser    map[string]string `json:"join_user"`   // 申请者
+	InviteUid   string            `json:"invite_uid"`  // 邀请者
+	InviteName  string            `json:"invite_name"` // 邀请者名称
+	Source      int               `json:"source"`      // 申请来源 1主动加入 2邀请加入
+	Subscribers []string          `json:"subscribers"` // 消息订阅者
 }
 
 // MsgGroupTransferGrouper 群主转让
