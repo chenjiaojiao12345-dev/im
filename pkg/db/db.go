@@ -16,6 +16,21 @@ type BaseModel struct {
 	UpdatedAt Time
 }
 
+func (t Time) InLocation(locationName string) Time {
+	if len(locationName) == 0 {
+		locationName = "Asia/Shanghai"
+	}
+	loc, err := time.LoadLocation(locationName)
+	if err != nil {
+		loc, _ = time.LoadLocation("Asia/Shanghai") // 默认时区
+	}
+	return Time(time.Time(t).In(loc))
+}
+
+func (t Time) FormatInLocation(locationName string) string {
+	return t.InLocation(locationName).String()
+}
+
 func (t *Time) UnmarshalJSON(data []byte) (err error) {
 	now, err := time.ParseInLocation(`"`+timeFormart+`"`, string(data), time.Local)
 	*t = Time(now)
