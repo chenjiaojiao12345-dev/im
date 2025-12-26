@@ -16,19 +16,19 @@ type BaseModel struct {
 	UpdatedAt Time
 }
 
-func (t Time) InLocation(locationName string) Time {
-	if len(locationName) == 0 {
+func timeZone(locationName string) *time.Location {
+	if locationName == "" {
 		locationName = "Asia/Shanghai"
 	}
 	loc, err := time.LoadLocation(locationName)
 	if err != nil {
-		loc, _ = time.LoadLocation("Asia/Shanghai") // 默认时区
+		loc, _ = time.LoadLocation("Asia/Shanghai")
 	}
-	return Time(time.Time(t).In(loc))
+	return loc
 }
 
 func (t Time) FormatInLocation(locationName string) string {
-	return t.InLocation(locationName).String()
+	return time.Time(t).In(timeZone(locationName)).Format(timeFormart)
 }
 
 func (t *Time) UnmarshalJSON(data []byte) (err error) {
