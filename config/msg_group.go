@@ -376,7 +376,17 @@ func (c *Context) SendGroupMemberInviteReq(req MsgGroupMemberInviteReq) error {
 
 // SendGroupMemberApplyJoinReq 申请入群消息
 func (c *Context) SendGroupMemberApplyJoinReq(req MsgGroupMemberJoinReq) error {
-	content := fmt.Sprintf(`“{0}“想邀请%d位朋友加入群聊`, len(req.JoinUser))
+	content := "有朋友申请加入群聊"
+	if req.Source == 2 {
+		content = fmt.Sprintf(`%s想邀请%d位朋友加入群聊`, req.InviteName, len(req.JoinUser))
+	} else if req.Source == 1 {
+		var oneName string
+		for _, v := range req.JoinUser {
+			oneName = v
+			break
+		}
+		content = fmt.Sprintf(`%s申请加入群聊`, oneName)
+	}
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
 			NoPersist: 0,
