@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"sync"
 	"time"
 
@@ -123,6 +124,85 @@ func (c *Context) Cache() cache.Cache {
 func (c *Context) AuthMiddleware(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 
 	return r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)
+}
+
+// 认证中间件 - Token + IP白名单 + RBAC权限
+func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
+	return func(ctx *wkhttp.Context) {
+
+		// Token 校验
+		r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
+		if ctx.IsAborted() {
+			return
+		}
+
+		// IP 白名单
+		c.checkAdminIPWhitelist(ctx)
+		if ctx.IsAborted() {
+			return
+		}
+
+		// RBAC 权限
+		c.checkAdminPermission(ctx)
+		if ctx.IsAborted() {
+			return
+		}
+
+		ctx.Next()
+	}
+}
+
+func (c *Context) checkAdminIPWhitelist(ctx *wkhttp.Context) {
+	ip := ctx.ClientIP()
+
+	allowed, err := c.isIPInAdminWhitelist(ip)
+	if err != nil {
+		ctx.ResponseError(err)
+		ctx.Abort()
+		return
+	}
+
+	if !allowed {
+		ctx.ResponseError(errors.New("当前IP不在后台访问白名单中"))
+		ctx.Abort()
+		return
+	}
+}
+
+func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
+	adminUID := ctx.GetLoginUID()
+
+	path := ctx.Request.URL.Path
+	method := ctx.Request.Method
+
+	ok, err := c.adminPermission(adminUID, method, path)
+	if err != nil {
+		ctx.ResponseError(err)
+		ctx.Abort()
+		return
+	}
+
+	if !ok {
+		ctx.ResponseError(errors.New("无权限访问该接口"))
+		ctx.Abort()
+		return
+	}
+}
+
+// isIPInAdminWhitelist 判断IP是否在后台白名单中（TODO: 待实现）
+func (m *Context) isIPInAdminWhitelist(ip string) (bool, error) {
+	// TODO: 后续从 admin_ip_whitelist 表查询
+	return true, nil
+}
+
+// checkAdminPermission 判断管理员是否有接口访问权限（TODO: 待实现）
+func (m *Context) adminPermission(
+	adminUID string,
+	method string,
+	path string,
+) (bool, error) {
+	// TODO: 后续实现 RBAC 菜单 / API 权限校验
+	return true, nil
 }
 
 // GetRedisConn GetRedisConn
