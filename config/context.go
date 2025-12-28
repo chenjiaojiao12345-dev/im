@@ -131,10 +131,10 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
 
 		// Token 校验
-		//r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
-		//if ctx.IsAborted() {
-		//	return
-		//}
+		r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
+		if ctx.IsAborted() {
+			return
+		}
 
 		// IP 白名单
 		c.checkAdminIPWhitelist(ctx)
@@ -191,6 +191,10 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
 func (m *Context) isIPInAdminWhitelist(ip string) (bool, error) {
+	if ip == "127.0.0.1" || ip == "0.0.0.0" {
+		return true, nil
+	}
+
 	var cnt int64
 
 	_, err := m.mySQLSession.
