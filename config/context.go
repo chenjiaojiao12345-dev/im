@@ -131,10 +131,10 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
 
 		// Token 校验
-		r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
-		if ctx.IsAborted() {
-			return
-		}
+		//r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
+		//if ctx.IsAborted() {
+		//	return
+		//}
 
 		// IP 白名单
 		c.checkAdminIPWhitelist(ctx)
@@ -189,10 +189,20 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 	}
 }
 
-// isIPInAdminWhitelist 判断IP是否在后台白名单中（TODO: 待实现）
+// isIPInAdminWhitelist 判断IP是否在后台白名单中
 func (m *Context) isIPInAdminWhitelist(ip string) (bool, error) {
-	// TODO: 后续从 admin_ip_whitelist 表查询
-	return true, nil
+	var cnt int64
+
+	_, err := m.mySQLSession.
+		Select("COUNT(1)").
+		From("admin_ip_whitelist").
+		Where("status = 1 AND ip = INET6_ATON(?)", ip).
+		Load(&cnt)
+	if err != nil {
+		return false, err
+	}
+
+	return cnt > 0, nil
 }
 
 // checkAdminPermission 判断管理员是否有接口访问权限（TODO: 待实现）
