@@ -175,6 +175,8 @@ const (
 	CMDSyncPinnedMessage = "syncPinnedMessage"
 	// 消息擦除
 	CMDMessageErase = "messageEerase"
+	// 配置变更
+	CMDConfigChange = "configChange"
 )
 
 // UserDeviceTokenPrefix 用户设备token缓存前缀
