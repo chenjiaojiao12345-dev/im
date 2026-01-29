@@ -192,6 +192,9 @@ func (c *Context) SendGroupMemberAdd(req *MsgGroupMemberAddReq) error {
 		params = append(params, fmt.Sprintf("{%d}", index))
 	}
 	content := fmt.Sprintf("%s邀请%s加入群聊", req.OperatorName, strings.Join(params, ","))
+	if len(params) == 1 && req.OperatorName == members[0].Name {
+		content = fmt.Sprintf("%s加入了群聊", req.OperatorName)
+	}
 
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
