@@ -1181,6 +1181,12 @@ func (f FIREBASEPush) Safe() FIREBASEPush {
 	return f
 }
 
+func (j JGPush) Safe() JGPush {
+	j.AppKey = MaskSecret(j.AppKey)
+	j.MasterSecret = MaskSecret(j.MasterSecret)
+	return j
+}
+
 type duration struct {
 	time.Duration
 }
