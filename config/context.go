@@ -131,10 +131,10 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
 
 		// Token 校验
-		r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
-		if ctx.IsAborted() {
-			return
-		}
+		//r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
+		//if ctx.IsAborted() {
+		//	return
+		//}
 
 		// IP 白名单
 		c.checkAdminIPWhitelist(ctx)
