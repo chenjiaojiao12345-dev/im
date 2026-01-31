@@ -1,7 +1,8 @@
 package config
 
 import (
-	"errors"
+	"github.com/gin-gonic/gin"
+	"net/http"
 	"sync"
 	"time"
 
@@ -157,14 +158,16 @@ func (c *Context) checkAdminIPWhitelist(ctx *wkhttp.Context) {
 
 	allowed, err := c.isIPInAdminWhitelist(ip)
 	if err != nil {
-		ctx.ResponseError(err)
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"msg": "当前IP不在后台访问白名单中！",
+		})
 		return
 	}
 
 	if !allowed {
-		ctx.ResponseError(errors.New("当前IP不在后台访问白名单中"))
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"msg": "当前IP不在后台访问白名单中！",
+		})
 		return
 	}
 }
@@ -177,14 +180,16 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 
 	ok, err := c.adminPermission(adminUID, method, path)
 	if err != nil {
-		ctx.ResponseError(err)
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"msg": "无权限访问该接口！",
+		})
 		return
 	}
 
 	if !ok {
-		ctx.ResponseError(errors.New("无权限访问该接口"))
-		ctx.Abort()
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"msg": "无权限访问该接口！",
+		})
 		return
 	}
 }
