@@ -3,6 +3,7 @@ package config
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -132,7 +133,7 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
 
 		// Token 校验
-		r.AuthMiddleware(c.Cache(), c.cfg.Cache.TokenCachePrefix)(ctx)
+		c.checkAuth(ctx, c.Cache(), c.cfg.Cache.TokenCachePrefix)
 		if ctx.IsAborted() {
 			return
 		}
@@ -150,6 +151,49 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 		}
 
 		ctx.Next()
+	}
+}
+
+func (c *Context) GetLoginUID(token string, tokenPrefix string, cache cache.Cache) string {
+	uid, err := cache.Get(tokenPrefix + token)
+	if err != nil {
+		return ""
+	}
+	return uid
+}
+
+func (c *Context) checkAuth(ctx *wkhttp.Context, cache cache.Cache, tokenPrefix string) {
+	token := ctx.GetHeader("token")
+	if token == "" {
+		ctx.Abort()
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"msg": "token不能为空，请先登录！",
+		})
+		return
+	}
+
+	uidAndName := c.GetLoginUID(token, tokenPrefix, cache)
+	if strings.TrimSpace(uidAndName) == "" {
+		ctx.Abort()
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"msg": "请先登录！",
+		})
+		return
+	}
+
+	uidAndNames := strings.Split(uidAndName, "@")
+	if len(uidAndNames) < 2 {
+		ctx.Abort()
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"msg": "token有误！",
+		})
+		return
+	}
+
+	ctx.Set("uid", uidAndNames[0])
+	ctx.Set("name", uidAndNames[1])
+	if len(uidAndNames) > 2 {
+		ctx.Set("role", uidAndNames[2])
 	}
 }
 
