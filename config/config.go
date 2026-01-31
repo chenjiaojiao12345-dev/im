@@ -1132,6 +1132,7 @@ type FIREBASEPush struct {
 
 // 极光 推送
 type JGPush struct {
+	PackageName  string `json:"packageName"`
 	AppKey       string `json:"appKey"`
 	MasterSecret string `json:"masterSecret"`
 }
