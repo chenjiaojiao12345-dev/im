@@ -1130,6 +1130,12 @@ type FIREBASEPush struct {
 	ProjectId   string `json:"projectId"`
 }
 
+// 极光 推送
+type JGPush struct {
+	AppKey       string `json:"appKey"`
+	MasterSecret string `json:"masterSecret"`
+}
+
 func MaskSecret(s string) string {
 	if s == "" {
 		return ""

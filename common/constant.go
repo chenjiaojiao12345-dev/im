@@ -226,6 +226,9 @@ const (
 
 	// DeviceTypeVIVO vivo设备
 	DeviceTypeVIVO DeviceType = "VIVO"
+
+	// DeviceTypeJG 极光设备
+	DeviceTypeJG DeviceType = "JG"
 )
 
 // QRCodeType 二维码类型
