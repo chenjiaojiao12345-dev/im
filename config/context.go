@@ -1,8 +1,10 @@
 package config
 
 import (
+	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/util"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -150,6 +152,57 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 			return
 		}
 
+		ctx.Next()
+	}
+}
+
+// 认证中间件 - 签名
+func (c *Context) AuthMiddlewareForSign(r *wkhttp.WKHttp, secret string) wkhttp.HandlerFunc {
+	return func(ctx *wkhttp.Context) {
+		// 1. 获取 query 参数
+		query := ctx.Request.URL.Query()
+
+		// 2. 取出 sign 并删除（不要参与签名）
+		sign := query.Get("sign")
+		if sign == "" {
+			ctx.Abort()
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg": "miss sign",
+			})
+			return
+		}
+		query.Del("sign")
+
+		// 3. 按 key 排序拼接字符串
+		keys := make([]string, 0, len(query))
+		for k := range query {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		var sb strings.Builder
+		for i, k := range keys {
+			sb.WriteString(k)
+			sb.WriteString("=")
+			sb.WriteString(query.Get(k)) // 这里只取第一个值，如果多值可自定义
+			if i < len(keys)-1 {
+				sb.WriteString("&")
+			}
+		}
+
+		// 5. 计算签名
+		expected := util.HmacSha256(sb.String(), secret)
+
+		// 6. 对比
+		if !strings.EqualFold(expected, sign) {
+			ctx.Abort()
+			ctx.JSON(http.StatusUnauthorized, gin.H{
+				"msg": "invalid sign",
+			})
+			return
+		}
+
+		// 校验通过
 		ctx.Next()
 	}
 }
