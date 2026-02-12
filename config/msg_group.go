@@ -26,7 +26,7 @@ func (c *Context) SendGroupCreate(req *MsgGroupCreateReq) error {
 		params = append(params, fmt.Sprintf("{%d}", i))
 		i++
 	}
-	content := fmt.Sprintf("%s邀请%s加入群聊", req.CreatorName, strings.Join(params, ","))
+	content := fmt.Sprintf("[%s邀请%s加入群聊]", req.CreatorName, strings.Join(params, ","))
 
 	return c.SendMessage(&MsgSendReq{
 		Header: MsgHeader{
@@ -191,7 +191,7 @@ func (c *Context) SendGroupMemberAdd(req *MsgGroupMemberAddReq) error {
 	for index := range members {
 		params = append(params, fmt.Sprintf("{%d}", index))
 	}
-	content := fmt.Sprintf("%s邀请%s加入群聊", req.OperatorName, strings.Join(params, ","))
+	content := fmt.Sprintf("%s邀请%s加入群聊.", req.OperatorName, strings.Join(params, ","))
 	if len(params) == 1 && req.OperatorName == members[0].Name {
 		content = fmt.Sprintf("%s加入了群聊", req.OperatorName)
 	}
