@@ -1,10 +1,15 @@
 package config
 
 import (
+	"bytes"
+	"crypto/hmac"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/util"
 	"github.com/gin-gonic/gin"
+	"io"
+	"math"
 	"net/http"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -157,52 +162,92 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 }
 
 // 认证中间件 - 签名
-func (c *Context) AuthMiddlewareForSign(r *wkhttp.WKHttp, secret string) wkhttp.HandlerFunc {
+func (c *Context) AuthMiddlewareForSign(secret string) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
-		// 1. 获取 query 参数
-		query := ctx.Request.URL.Query()
 
-		// 2. 取出 sign 并删除（不要参与签名）
+		req := ctx.Request
+		method := req.Method
+		path := req.URL.Path
+
+		// =========================
+		// 1️ 校验 timestamp
+		// =========================
+		query := req.URL.Query()
+
 		sign := query.Get("sign")
+		timestamp := query.Get("timestamp")
+
 		if sign == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss sign"})
 			ctx.Abort()
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"msg": "miss sign",
-			})
 			return
 		}
+
+		if timestamp == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss timestamp"})
+			ctx.Abort()
+			return
+		}
+
+		ts, err := strconv.ParseInt(timestamp, 10, 64)
+		if err != nil || math.Abs(float64(time.Now().Unix()-ts)) > 60 {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "timestamp expired"})
+			ctx.Abort()
+			return
+		}
+
 		query.Del("sign")
 
-		// 3. 按 key 排序拼接字符串
+		// =========================
+		// 2️ 处理 query 排序
+		// =========================
 		keys := make([]string, 0, len(query))
 		for k := range query {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
 
-		var sb strings.Builder
+		var queryBuilder strings.Builder
 		for i, k := range keys {
-			sb.WriteString(k)
-			sb.WriteString("=")
-			sb.WriteString(query.Get(k)) // 这里只取第一个值，如果多值可自定义
+			queryBuilder.WriteString(k)
+			queryBuilder.WriteString("=")
+			queryBuilder.WriteString(query.Get(k))
 			if i < len(keys)-1 {
-				sb.WriteString("&")
+				queryBuilder.WriteString("&")
 			}
 		}
 
-		// 5. 计算签名
-		expected := util.HmacSha256(sb.String(), secret)
+		queryString := queryBuilder.String()
 
-		// 6. 对比
-		if !strings.EqualFold(expected, sign) {
+		// =========================
+		// 3️ 读取 body（关键）
+		// =========================
+		var bodyBytes []byte
+		if method == http.MethodPost || method == http.MethodPut {
+			bodyBytes, _ = io.ReadAll(req.Body)
+			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // 还原 body
+		}
+
+		// =========================
+		// 4️ 生成签名字符串
+		// =========================
+		data := method + "\n" +
+			path + "\n" +
+			timestamp + "\n" +
+			queryString + "\n" +
+			string(bodyBytes)
+
+		expected := util.HmacSha256(data, secret)
+
+		// =========================
+		// 5️ 安全比较
+		// =========================
+		if !hmac.Equal([]byte(expected), []byte(sign)) {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "invalid sign"})
 			ctx.Abort()
-			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"msg": "invalid sign",
-			})
 			return
 		}
 
-		// 校验通过
 		ctx.Next()
 	}
 }
