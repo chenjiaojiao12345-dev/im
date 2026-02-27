@@ -297,8 +297,10 @@ func (c *Context) checkAuth(ctx *wkhttp.Context, cache cache.Cache, tokenPrefix 
 
 func (c *Context) checkAdminIPWhitelist(ctx *wkhttp.Context) {
 	ip := ctx.ClientIP()
+	clientIDStr := ctx.Request.Header.Get("Clientid")
+	clientID, _ := strconv.Atoi(clientIDStr)
 
-	allowed, err := c.isIPInAdminWhitelist(ip)
+	allowed, err := c.isIPInAdminWhitelist(ip, clientID)
 	if err != nil {
 		ctx.Abort()
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -341,18 +343,22 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 }
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
-func (m *Context) isIPInAdminWhitelist(ip string) (bool, error) {
+func (m *Context) isIPInAdminWhitelist(ip string, clientId int) (bool, error) {
 	if ip == "127.0.0.1" || ip == "0.0.0.0" {
 		return true, nil
 	}
 
 	var cnt int64
-
-	_, err := m.mySQLSession.
+	builder := m.mySQLSession.
 		Select("COUNT(1)").
 		From("admin_ip_whitelist").
-		Where("status = 1 AND ip = INET6_ATON(?)", ip).
-		Load(&cnt)
+		Where("status = 1 AND ip = INET6_ATON(?)", ip)
+
+	if clientId != 0 {
+		builder = builder.Where("client_id = ?", clientId)
+	}
+
+	_, err := builder.Load(&cnt)
 	if err != nil {
 		return false, err
 	}
