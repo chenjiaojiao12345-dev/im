@@ -886,7 +886,6 @@ type MsgGroupMemberAddReq struct {
 	OperatorName string        `json:"operator_name"` // 操作者名称
 	GroupNo      string        `json:"group_no"`      // 群编号
 	Members      []*UserBaseVo `json:"members"`       // 邀请成员
-	MemberCount  int           `json:"member_count"`  // 群成员总数
 }
 
 // CMDGroupAvatarUpdateReq 群头像更新请求

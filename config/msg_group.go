@@ -205,12 +205,11 @@ func (c *Context) SendGroupMemberAdd(req *MsgGroupMemberAddReq) error {
 		ChannelID:   req.GroupNo,
 		ChannelType: common.ChannelTypeGroup.Uint8(),
 		Payload: []byte(util.ToJson(map[string]interface{}{
-			"from_uid":     req.Operator,
-			"from_name":    req.OperatorName,
-			"content":      content,
-			"extra":        members,
-			"type":         common.GroupMemberAdd,
-			"member_count": req.MemberCount,
+			"from_uid":  req.Operator,
+			"from_name": req.OperatorName,
+			"content":   content,
+			"extra":     members,
+			"type":      common.GroupMemberAdd,
 		})),
 	})
 }
