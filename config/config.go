@@ -95,6 +95,11 @@ type Config struct {
 		Level   zapcore.Level
 		LineNum bool // 是否显示代码行数
 	}
+	// ---------- k8s -----------
+	K8s struct {
+		NameSpace   string
+		IngressName string
+	}
 	// ---------- db相关配置 ----------
 	DB struct {
 		MySQLAddr            string        // mysql的连接信息
@@ -588,6 +593,10 @@ func (c *Config) ConfigureWithViper(vp *viper.Viper) {
 
 	//#################### cluster ####################
 	c.Cluster.NodeID = c.getInt("cluster.nodeID", c.Cluster.NodeID)
+
+	//#################### k8s ####################
+	c.K8s.NameSpace = c.getString("k8s.nameSpace", c.K8s.NameSpace)
+	c.K8s.IngressName = c.getString("k8s.ingressName", c.K8s.IngressName)
 
 	//#################### 缓存配置 ####################
 	c.Cache.TokenCachePrefix = c.getString("cache.tokenCachePrefix", c.Cache.TokenCachePrefix)
