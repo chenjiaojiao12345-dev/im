@@ -300,7 +300,15 @@ func (c *Context) checkAdminIPWhitelist(ctx *wkhttp.Context) {
 	clientIDStr := ctx.Request.Header.Get("Clientid")
 	clientID, _ := strconv.Atoi(clientIDStr)
 
-	allowed, err := c.isIPInAdminWhitelist(ip, clientID)
+	uid, exists := ctx.Get("uid")
+	if !exists {
+		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"msg": "未找到用户信息"})
+		return
+	}
+
+	uidStr := uid.(string)
+
+	allowed, err := c.isIPInAdminWhitelist(ip, clientID, uidStr)
 	if err != nil {
 		ctx.Abort()
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -343,7 +351,7 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 }
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
-func (m *Context) isIPInAdminWhitelist(ip string, clientId int) (bool, error) {
+func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
 	if ip == "127.0.0.1" || ip == "0.0.0.0" {
 		return true, nil
 	}
@@ -354,7 +362,8 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int) (bool, error) {
 		From("admin_ip_whitelist").
 		Where("status = 1 AND ip = INET6_ATON(?)", ip)
 
-	if clientId != 0 {
+	//超管不用分平台
+	if clientId != 0 && uid != "admin" {
 		builder = builder.Where("client_id = ?", clientId)
 	}
 
