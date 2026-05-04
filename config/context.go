@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"crypto/hmac"
+	"fmt"
 	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/util"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -352,22 +353,45 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
 func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
-	if ip == "127.0.0.1" || ip == "0.0.0.0" {
+	// 1. 基础特权放行
+	if ip == "127.0.0.1" || ip == "0.0.0.0" || uid == "admin" {
 		return true, nil
 	}
 
+	// 2. 检查应用层面的总开关
+	var isOpen int
+	_, err := m.mySQLSession.
+		Select("is_whitelist_open").
+		From("workplace_app").
+		Where("client_id = ?", clientId).
+		Limit(1).
+		Load(&isOpen)
+
+	if err != nil {
+		fmt.Printf("查询白名单开关失败: %v, clientId: %d\n", err, clientId)
+	}
+
+	// 开关关闭，直接放行
+	if isOpen == 0 {
+		return true, nil
+	}
+
+	// 3. 校验具体的 IP/网段记录
 	var cnt int64
 	builder := m.mySQLSession.
 		Select("COUNT(1)").
 		From("admin_ip_whitelist").
-		Where("status = 1 AND ip = INET6_ATON(?)", ip)
+		Where("status = 1")
 
-	//超管不用分平台
+	// 核心位运算逻辑：用户IP & 掩码二进制 == 记录中的网络地址二进制
+	builder = builder.Where("(INET6_ATON(?) & mask_binary) = ip", ip)
+
+	// 非超管且指定了平台时，增加隔离条件
 	if clientId != 0 && uid != "admin" {
 		builder = builder.Where("client_id = ?", clientId)
 	}
 
-	_, err := builder.Load(&cnt)
+	_, err = builder.Load(&cnt)
 	if err != nil {
 		return false, err
 	}
