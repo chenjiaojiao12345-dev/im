@@ -121,6 +121,8 @@ const (
 	GroupType = "group_type"
 	// GroupShowOnline 群成员显示在线状态
 	GroupShowOnline = "show_online"
+	// GroupColor 群颜色
+	GroupColor = "color"
 )
 
 // 命令消息
