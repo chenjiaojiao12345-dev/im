@@ -154,7 +154,7 @@ func (c *Context) SendGroupUpdate(req *MsgGroupUpdateReq) error {
 	}
 
 	//此选项不需要发送消息
-	if req.Attr == common.GroupShowOnline {
+	if req.Attr == common.GroupShowOnline || req.Attr == common.GroupColor {
 		return nil
 	}
 
