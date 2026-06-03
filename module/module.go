@@ -161,7 +161,7 @@ func executeSQLTable(sqlfss []*register.SQLFS, session *dbr.Session, tableName s
 		sqlfss: sqlfss,
 	}
 	ms := migrate.MigrationSet{
-		TableName: "gorp_migrations_pay",
+		TableName: tableName,
 	}
 	_, err := ms.Exec(session.DB, "mysql", migrations, migrate.Up)
 	if err != nil {
