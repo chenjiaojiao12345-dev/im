@@ -51,6 +51,44 @@ func Setup(ctx *config.Context) error {
 
 }
 
+func SetupTanle(ctx *config.Context, tableName string) error {
+
+	// 获取所有模块
+	ms := register.GetModules(ctx)
+
+	// 初始化SQL
+	var sqlfss []*register.SQLFS
+	for _, m := range ms {
+		if m.SQLDir != nil {
+			sqlfss = append(sqlfss, m.SQLDir)
+		}
+
+	}
+	err := executeSQL(sqlfss, ctx.DB())
+	if err != nil {
+		return err
+	}
+	// 注册api
+	for _, m := range ms {
+		if m.SetupAPI != nil {
+			a := m.SetupAPI()
+			if a != nil {
+				a.Route(ctx.GetHttpRoute())
+			}
+		}
+		if ctx.SetupTask {
+			if m.SetupTask != nil {
+				t := m.SetupTask()
+				if t != nil {
+					t.RegisterTasks()
+				}
+			}
+		}
+	}
+	return nil
+
+}
+
 func SetupNoSql(ctx *config.Context) error {
 
 	// 获取所有模块
@@ -112,6 +150,20 @@ func executeSQL(sqlfss []*register.SQLFS, session *dbr.Session) error {
 		sqlfss: sqlfss,
 	}
 	_, err := migrate.Exec(session.DB, "mysql", migrations, migrate.Up)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func executeSQLTable(sqlfss []*register.SQLFS, session *dbr.Session, tableName string) error {
+	migrations := &FileDirMigrationSource{
+		sqlfss: sqlfss,
+	}
+	ms := migrate.MigrationSet{
+		TableName: "gorp_migrations_pay",
+	}
+	_, err := ms.Exec(session.DB, "mysql", migrations, migrate.Up)
 	if err != nil {
 		return err
 	}
