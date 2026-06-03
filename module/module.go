@@ -51,7 +51,7 @@ func Setup(ctx *config.Context) error {
 
 }
 
-func SetupTanle(ctx *config.Context, tableName string) error {
+func SetupTable(ctx *config.Context, tableName string) error {
 
 	// 获取所有模块
 	ms := register.GetModules(ctx)
@@ -64,7 +64,7 @@ func SetupTanle(ctx *config.Context, tableName string) error {
 		}
 
 	}
-	err := executeSQL(sqlfss, ctx.DB())
+	err := executeSQLTable(sqlfss, ctx.DB(), tableName)
 	if err != nil {
 		return err
 	}
