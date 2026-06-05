@@ -83,6 +83,10 @@ const (
 	// GroupMemberApplyJoin 群成员申请加入
 	GroupMemberApplyJoin ContentType = 1023
 
+	// --------- 红包类 ---------
+	SendRedPacket = 1050
+	GetRedPacket  = 1051
+
 	// ---------- 客服类 ----------
 	HotlineAssignTo ContentType = 1200 // 分配客服
 	HotlineSolved   ContentType = 1201 // 已解决
