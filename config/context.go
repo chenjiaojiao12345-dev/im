@@ -3,8 +3,9 @@ package config
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-	"github.com/TangSengDaoDao/TangSengDaoDaoServerLib/pkg/util"
 	"github.com/gin-gonic/gin"
 	"io"
 	"math"
@@ -246,7 +247,7 @@ func (c *Context) AuthMiddlewareForSign(secret string) wkhttp.HandlerFunc {
 		fmt.Printf("【后端线上使用的 Secret 明文】: '%s'\n", secret)
 		fmt.Printf("【前端传过来的 Sign 密文】: %q\n", sign)
 
-		expected := util.HmacSha256(data, secret)
+		expected := HmacSha256(data, secret)
 
 		fmt.Printf("【后端线上算出的 Expected 指纹】: %q\n", expected)
 		fmt.Println("==================================================")
@@ -530,4 +531,10 @@ type everyScheduler struct {
 
 func (s *everyScheduler) Next(prev time.Time) time.Time {
 	return prev.Add(s.Interval)
+}
+
+func HmacSha256(data, secret string) string {
+	h := hmac.New(sha256.New, []byte(secret))
+	h.Write([]byte(data))
+	return hex.EncodeToString(h.Sum(nil))
 }
