@@ -239,7 +239,17 @@ func (c *Context) AuthMiddlewareForSign(secret string) wkhttp.HandlerFunc {
 			string(bodyBytes)
 
 		fmt.Printf("AuthMiddlewareForSign raw data: %q\n", data)
+
+		fmt.Println("========= 🚨 [线上真实加签现场核销大盘] =========")
+		fmt.Printf("【后端线上拼出的 data 真实全貌】: %q\n", data)
+		fmt.Printf("【后端线上拼出的 queryString 全貌】: %q\n", queryString)
+		fmt.Printf("【后端线上使用的 Secret 明文】: '%s'\n", secret)
+		fmt.Printf("【前端传过来的 Sign 密文】: %q\n", sign)
+
 		expected := util.HmacSha256(data, secret)
+
+		fmt.Printf("【后端线上算出的 Expected 指纹】: %q\n", expected)
+		fmt.Println("==================================================")
 
 		// =========================
 		// 5️ 安全比较
