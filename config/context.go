@@ -238,6 +238,7 @@ func (c *Context) AuthMiddlewareForSign(secret string) wkhttp.HandlerFunc {
 			queryString + "\n" +
 			string(bodyBytes)
 
+		fmt.Println("AuthMiddlewareForSign data:", data)
 		expected := util.HmacSha256(data, secret)
 
 		// =========================
