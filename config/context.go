@@ -359,28 +359,30 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		return true, nil
 	}
 
-	var isOpen int
-	query := m.mySQLSession.
-		Select("is_whitelist_open").
-		From("workplace_app")
+	isOpen := 1
 
+	//超管没有开关限制
 	if uid != "admin" {
+		query := m.mySQLSession.
+			Select("is_whitelist_open").
+			From("workplace_app")
+
 		query = query.Where("client_id = ?", clientId)
-	}
 
-	// 执行加载并释放结果
-	_, err := query.Limit(1).Load(&isOpen)
-	if err != nil {
-		return false, err
-	}
+		// 执行加载并释放结果
+		_, err := query.Limit(1).Load(&isOpen)
+		if err != nil {
+			return false, err
+		}
 
-	if err != nil {
-		fmt.Printf("查询白名单开关失败: %v, clientId: %d\n", err, clientId)
-	}
+		if err != nil {
+			fmt.Printf("查询白名单开关失败: %v, clientId: %d\n", err, clientId)
+		}
 
-	// 开关关闭，直接放行(超管必须有白名单)
-	if isOpen == 0 && uid != "admin" {
-		return true, nil
+		// 开关关闭，直接放行
+		if isOpen == 0 {
+			return true, nil
+		}
 	}
 
 	// 3. 校验具体的 IP/网段记录
@@ -393,12 +395,12 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 	// 核心位运算逻辑：用户IP & 掩码二进制 == 记录中的网络地址二进制
 	builder = builder.Where("(INET6_ATON(?) & mask_binary) = ip", ip)
 
-	// 非超管且指定了平台时，增加隔离条件
+	// 非超管且指定了平台时，增加隔离条件,超管只要存在IP即可放行
 	if clientId != 0 && uid != "admin" {
 		builder = builder.Where("client_id = ?", clientId)
 	}
 
-	_, err = builder.Load(&cnt)
+	_, err := builder.Load(&cnt)
 	if err != nil {
 		return false, err
 	}
