@@ -353,7 +353,8 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 }
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
-func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
+func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
+	fmt.Println("isIPInAdminWhitelist ip:", ip)
 	// 1. 基础特权放行
 	if ip == "127.0.0.1" || ip == "0.0.0.0" {
 		return true, nil
@@ -363,7 +364,7 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 
 	//超管没有开关限制
 	if uid != "admin" {
-		query := m.mySQLSession.
+		query := c.mySQLSession.
 			Select("is_whitelist_open").
 			From("workplace_app")
 
@@ -381,13 +382,14 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 
 		// 开关关闭，直接放行
 		if isOpen == 0 {
+			fmt.Println("isIPInAdminWhitelist isOpen == 0")
 			return true, nil
 		}
 	}
 
 	// 3. 校验具体的 IP/网段记录
 	var cnt int64
-	builder := m.mySQLSession.
+	builder := c.mySQLSession.
 		Select("COUNT(1)").
 		From("admin_ip_whitelist").
 		Where("status = 1")
@@ -405,6 +407,7 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		return false, err
 	}
 
+	fmt.Println("isIPInAdminWhitelist cnt:", cnt)
 	return cnt > 0, nil
 }
 
