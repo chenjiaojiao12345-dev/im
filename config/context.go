@@ -378,8 +378,8 @@ func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		fmt.Printf("查询白名单开关失败: %v, clientId: %d\n", err, clientId)
 	}
 
-	// 开关关闭，直接放行
-	if isOpen == 0 {
+	// 开关关闭，直接放行(超管必须有白名单)
+	if isOpen == 0 && uid != "admin" {
 		return true, nil
 	}
 
