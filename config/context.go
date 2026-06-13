@@ -355,18 +355,24 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
 func (m *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
 	// 1. 基础特权放行
-	if ip == "127.0.0.1" || ip == "0.0.0.0" || uid == "admin" {
+	if ip == "127.0.0.1" || ip == "0.0.0.0" {
 		return true, nil
 	}
 
-	// 2. 检查应用层面的总开关
 	var isOpen int
-	_, err := m.mySQLSession.
+	query := m.mySQLSession.
 		Select("is_whitelist_open").
-		From("workplace_app").
-		Where("client_id = ?", clientId).
-		Limit(1).
-		Load(&isOpen)
+		From("workplace_app")
+
+	if uid != "admin" {
+		query = query.Where("client_id = ?", clientId)
+	}
+
+	// 执行加载并释放结果
+	_, err := query.Limit(1).Load(&isOpen)
+	if err != nil {
+		return false, err
+	}
 
 	if err != nil {
 		fmt.Printf("查询白名单开关失败: %v, clientId: %d\n", err, clientId)
