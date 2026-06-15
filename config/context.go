@@ -166,87 +166,59 @@ func (c *Context) AuthMiddlewareForIpRBAC(r *wkhttp.WKHttp) wkhttp.HandlerFunc {
 // 认证中间件 - 签名
 func (c *Context) AuthMiddlewareForSign(secret string) wkhttp.HandlerFunc {
 	return func(ctx *wkhttp.Context) {
+		c.checkSign(ctx, secret)
+		if ctx.IsAborted() {
+			return
+		}
+		ctx.Next()
+	}
+}
 
-		req := ctx.Request
-		method := req.Method
-		path := req.URL.Path
+// 认证中间件 - Ip,Token,菜单,签名
+func (c *Context) AuthMiddlewareForIpTokenRbacSign(secret string) wkhttp.HandlerFunc {
+	return func(ctx *wkhttp.Context) {
 
-		// =========================
-		// 1️ 校验 timestamp
-		// =========================
-		query := req.URL.Query()
-
-		sign := query.Get("sign")
-		timestamp := query.Get("timestamp")
-
-		if sign == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss sign"})
-			ctx.Abort()
+		// Token 校验
+		c.checkAuth(ctx, c.Cache(), c.cfg.Cache.TokenCachePrefix)
+		if ctx.IsAborted() {
 			return
 		}
 
-		if timestamp == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss timestamp"})
-			ctx.Abort()
+		// IP 白名单
+		c.checkAdminIPWhitelist(ctx)
+		if ctx.IsAborted() {
 			return
 		}
 
-		ts, err := strconv.ParseInt(timestamp, 10, 64)
-		if err != nil || math.Abs(float64(time.Now().Unix()-ts)) > 60 {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "timestamp expired"})
-			ctx.Abort()
+		// RBAC 权限
+		c.checkAdminPermission(ctx)
+		if ctx.IsAborted() {
 			return
 		}
 
-		query.Del("sign")
-
-		// =========================
-		// 2️ 处理 query 排序
-		// =========================
-		keys := make([]string, 0, len(query))
-		for k := range query {
-			keys = append(keys, k)
-		}
-		sort.Strings(keys)
-
-		var queryBuilder strings.Builder
-		for i, k := range keys {
-			queryBuilder.WriteString(k)
-			queryBuilder.WriteString("=")
-			queryBuilder.WriteString(query.Get(k))
-			if i < len(keys)-1 {
-				queryBuilder.WriteString("&")
-			}
+		//签名
+		c.checkSign(ctx, secret)
+		if ctx.IsAborted() {
+			return
 		}
 
-		queryString := queryBuilder.String()
+		ctx.Next()
+	}
+}
 
-		// =========================
-		// 3️ 读取 body（关键）
-		// =========================
-		var bodyBytes []byte
-		if method == http.MethodPost || method == http.MethodPut {
-			bodyBytes, _ = io.ReadAll(req.Body)
-			req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // 还原 body
+// 认证中间件 - Token,签名
+func (c *Context) AuthMiddlewareForTokenSign(secret string) wkhttp.HandlerFunc {
+	return func(ctx *wkhttp.Context) {
+
+		// Token 校验
+		c.checkAuth(ctx, c.Cache(), c.cfg.Cache.TokenCachePrefix)
+		if ctx.IsAborted() {
+			return
 		}
 
-		// =========================
-		// 4️ 生成签名字符串
-		// =========================
-		data := method + "\n" +
-			path + "\n" +
-			timestamp + "\n" +
-			queryString + "\n" +
-			string(bodyBytes)
-
-		expected := HmacSha256(data, secret)
-
-		// =========================
-		// 5️ 安全比较
-		// =========================
-		if !hmac.Equal([]byte(expected), []byte(sign)) {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "invalid sign"})
-			ctx.Abort()
+		//签名
+		c.checkSign(ctx, secret)
+		if ctx.IsAborted() {
 			return
 		}
 
@@ -294,6 +266,91 @@ func (c *Context) checkAuth(ctx *wkhttp.Context, cache cache.Cache, tokenPrefix 
 	ctx.Set("name", uidAndNames[1])
 	if len(uidAndNames) > 2 {
 		ctx.Set("role", uidAndNames[2])
+	}
+}
+
+func (c *Context) checkSign(ctx *wkhttp.Context, secret string) {
+	req := ctx.Request
+	method := req.Method
+	path := req.URL.Path
+
+	// =========================
+	// 1️ 校验 timestamp
+	// =========================
+	query := req.URL.Query()
+
+	sign := query.Get("sign")
+	timestamp := query.Get("timestamp")
+
+	if sign == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss sign"})
+		ctx.Abort()
+		return
+	}
+
+	if timestamp == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "miss timestamp"})
+		ctx.Abort()
+		return
+	}
+
+	ts, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil || math.Abs(float64(time.Now().Unix()-ts)) > 60 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "timestamp expired"})
+		ctx.Abort()
+		return
+	}
+
+	query.Del("sign")
+
+	// =========================
+	// 2️ 处理 query 排序
+	// =========================
+	keys := make([]string, 0, len(query))
+	for k := range query {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var queryBuilder strings.Builder
+	for i, k := range keys {
+		queryBuilder.WriteString(k)
+		queryBuilder.WriteString("=")
+		queryBuilder.WriteString(query.Get(k))
+		if i < len(keys)-1 {
+			queryBuilder.WriteString("&")
+		}
+	}
+
+	queryString := queryBuilder.String()
+
+	// =========================
+	// 3️ 读取 body（关键）
+	// =========================
+	var bodyBytes []byte
+	if method == http.MethodPost || method == http.MethodPut {
+		bodyBytes, _ = io.ReadAll(req.Body)
+		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // 还原 body
+	}
+
+	// =========================
+	// 4️ 生成签名字符串
+	// =========================
+	data := method + "\n" +
+		path + "\n" +
+		timestamp + "\n" +
+		queryString + "\n" +
+		string(bodyBytes)
+
+	expected := HmacSha256(data, secret)
+
+	// =========================
+	// 5️ 安全比较
+	// =========================
+	if !hmac.Equal([]byte(expected), []byte(sign)) {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"msg": "invalid sign"})
+		ctx.Abort()
+		return
 	}
 }
 
