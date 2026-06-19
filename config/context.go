@@ -370,6 +370,7 @@ func (c *Context) checkAdminIPWhitelist(ctx *wkhttp.Context) {
 
 	allowed, err := c.isIPInAdminWhitelist(ip, clientID, uidStr)
 	if err != nil {
+		fmt.Println("checkAdminIPWhitelist err:", err)
 		ctx.Abort()
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"msg": "当前IP不在后台访问白名单中！",
@@ -412,6 +413,8 @@ func (c *Context) checkAdminPermission(ctx *wkhttp.Context) {
 
 // isIPInAdminWhitelist 判断IP是否在后台白名单中
 func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (bool, error) {
+	fmt.Println("isIPInAdminWhitelist ip:", ip)
+
 	// 1. 基础特权放行
 	if ip == "127.0.0.1" || ip == "0.0.0.0" {
 		return true, nil
@@ -442,8 +445,6 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 			return true, nil
 		}
 	}
-
-	fmt.Println("isIPInAdminWhitelist ip:", ip)
 
 	parsedIP := net.ParseIP(ip)
 	if parsedIP == nil {
