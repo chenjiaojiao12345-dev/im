@@ -457,6 +457,8 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		builder = builder.Where("client_id = ?", clientId)
 	}
 
+	fmt.Println("isIPInAdminWhitelist ip:", ip)
+
 	_, err := builder.Load(&cnt)
 	if err != nil {
 		return false, err
