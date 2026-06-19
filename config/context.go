@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"math"
+	"net"
 	"net/http"
 	"sort"
 	"strconv"
@@ -452,8 +453,40 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		From("admin_ip_whitelist").
 		Where("status = 1")
 
-	// 核心位运算逻辑：用户IP & 掩码二进制 == 记录中的网络地址二进制
-	builder = builder.Where("(INET6_ATON(?) & mask_binary) = ip", ip)
+	// 兼容三种历史数据格式
+	ipObj := net.ParseIP(ip)
+	if ipObj == nil {
+		return false, fmt.Errorf("invalid ip format: %s", ip)
+	}
+
+	conds := make([]string, 0, 4)
+	args := make([]interface{}, 0, 4)
+
+	if v4 := ipObj.To4(); v4 != nil {
+		ip16 := ipObj.To16()
+
+		// 分支1: 历史正常数据，ip=4 mask=4
+		conds = append(conds,
+			"(LENGTH(ip) = 4 AND LENGTH(mask_binary) = 4 AND (? & mask_binary) = ip)")
+		args = append(args, []byte(v4))
+
+		// 分支2: 新数据，ip=16 mask=16
+		conds = append(conds,
+			"(LENGTH(ip) = 16 AND LENGTH(mask_binary) = 16 AND (? & mask_binary) = ip)")
+		args = append(args, []byte(ip16))
+
+		// 分支3: 当前 insert 产生的数据，ip=16 mask=4
+		conds = append(conds,
+			"(LENGTH(ip) = 16 AND LENGTH(mask_binary) = 4 AND (? & mask_binary) = RIGHT(ip, 4))")
+		args = append(args, []byte(v4))
+	} else {
+		// IPv6 输入，只能匹配 16/16
+		conds = append(conds,
+			"(LENGTH(ip) = 16 AND LENGTH(mask_binary) = 16 AND (? & mask_binary) = ip)")
+		args = append(args, []byte(ipObj.To16()))
+	}
+
+	builder = builder.Where("("+strings.Join(conds, " OR ")+")", args...)
 
 	// 非超管且指定了平台时，增加隔离条件,超管只要存在IP即可放行
 	if clientId != 0 && uid != "admin" {
