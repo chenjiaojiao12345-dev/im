@@ -87,6 +87,10 @@ const (
 	SendRedPacket = 1050
 	GetRedPacket  = 1051
 
+	// --------- 转账类 ---------
+	SendTransfer = 1060
+	GetTransfer  = 1061
+
 	// ---------- 客服类 ----------
 	HotlineAssignTo ContentType = 1200 // 分配客服
 	HotlineSolved   ContentType = 1201 // 已解决
