@@ -84,12 +84,14 @@ const (
 	GroupMemberApplyJoin ContentType = 1023
 
 	// --------- 红包类 ---------
-	SendRedPacket = 1050
-	GetRedPacket  = 1051
+	SendRedPacket   = 1050
+	GetRedPacket    = 1051
+	ReturnRedPacket = 1052
 
 	// --------- 转账类 ---------
-	SendTransfer = 1060
-	GetTransfer  = 1061
+	SendTransfer   = 1060
+	GetTransfer    = 1061
+	ReturnTransfer = 1062
 
 	// ---------- 客服类 ----------
 	HotlineAssignTo ContentType = 1200 // 分配客服
