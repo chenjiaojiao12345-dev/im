@@ -428,7 +428,7 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 			Select("is_whitelist_open").
 			From("workplace_app")
 
-		query = query.Where("client_id = ?", clientId)
+		query = query.Where("id = ?", clientId)
 
 		// 执行加载并释放结果
 		_, err := query.Limit(1).Load(&isOpen)
