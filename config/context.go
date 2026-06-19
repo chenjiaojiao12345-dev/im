@@ -443,6 +443,8 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		}
 	}
 
+	fmt.Println("isIPInAdminWhitelist ip:", ip)
+
 	parsedIP := net.ParseIP(ip)
 	if parsedIP == nil {
 		return false, fmt.Errorf("非法的 IP 格式: %s", ip)
@@ -460,8 +462,6 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 	if clientId != 0 && uid != "admin" {
 		builder = builder.Where("client_id = ?", clientId)
 	}
-
-	fmt.Println("isIPInAdminWhitelist ip:", ip)
 
 	_, err := builder.Load(&cnt)
 	if err != nil {
