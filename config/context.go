@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"math"
-	"net"
 	"net/http"
 	"sort"
 	"strconv"
@@ -446,20 +445,17 @@ func (c *Context) isIPInAdminWhitelist(ip string, clientId int, uid string) (boo
 		}
 	}
 
-	parsedIP := net.ParseIP(ip)
-	if parsedIP == nil {
-		return false, fmt.Errorf("非法的 IP 格式: %s", ip)
-	}
-	ipBytes := parsedIP.To16()
-
+	// 3. 校验具体的 IP/网段记录
 	var cnt int64
 	builder := c.mySQLSession.
 		Select("COUNT(1)").
 		From("admin_ip_whitelist").
 		Where("status = 1")
 
-	builder = builder.Where("(? & mask_binary) = ip", ipBytes)
+	// 核心位运算逻辑：用户IP & 掩码二进制 == 记录中的网络地址二进制
+	builder = builder.Where("(INET6_ATON(?) & mask_binary) = ip", ip)
 
+	// 非超管且指定了平台时，增加隔离条件,超管只要存在IP即可放行
 	if clientId != 0 && uid != "admin" {
 		builder = builder.Where("client_id = ?", clientId)
 	}
